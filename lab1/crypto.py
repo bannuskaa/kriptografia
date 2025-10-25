@@ -3,49 +3,59 @@
 File: crypto.py
 ---------------
 Assignment 1: Cryptography
-Course: CS 41
-Name: <YOUR NAME>
-SUNet: <SUNet ID>
+Name: Bereczki Anna
 
-Replace this with a description of the program.
 """
 import utils
+import random
 
 # Caesar Cipher
 
-def encrypt_caesar(plaintext):
-    """Encrypt plaintext using a Caesar cipher.
+def encrypt_caesar(plaintext,shift=3):
+    ciphertext = ""
+    for char in plaintext:
+        if char.isalpha():
+            base = 'A' if char.isupper() else 'a'
+            ciphertext += chr((ord(char) - ord(base) + shift) % 26 + ord(base))
+        else:
+            ciphertext += char
+    return ciphertext
 
-    Add more implementation details here.
-    """
-    raise NotImplementedError  # Your implementation here
-
-
-def decrypt_caesar(ciphertext):
-    """Decrypt a ciphertext using a Caesar cipher.
-
-    Add more implementation details here.
-    """
-    raise NotImplementedError  # Your implementation here
-
+def decrypt_caesar(ciphertext,shift=3):
+    return encrypt_caesar(ciphertext, - shift)
 
 # Vigenere Cipher
 
 def encrypt_vigenere(plaintext, keyword):
-    """Encrypt plaintext using a Vigenere cipher with a keyword.
+    ciphertext = ""
+    keyword = keyword.lower()
+    key_index = 0
 
-    Add more implementation details here.
-    """
-    raise NotImplementedError  # Your implementation here
+    for char in plaintext:
+        if char.isalpha():
+            shift = ord(keyword[key_index % len(keyword)]) - ord('a')
+            base = ord('A') if char.isupper() else ord('a')
+            ciphertext += chr((ord(char) - base + shift) % 26 + base)
+            key_index += 1
+        else:
+            ciphertext += char
+    return ciphertext
 
 
 def decrypt_vigenere(ciphertext, keyword):
-    """Decrypt ciphertext using a Vigenere cipher with a keyword.
+    plaintext = ""
+    keyword = keyword.lower()
+    key_index = 0
 
-    Add more implementation details here.
-    """
-    raise NotImplementedError  # Your implementation here
-
+    for char in ciphertext:
+        if char.isalpha():
+            shift = ord(keyword[key_index % len(keyword)]) - ord('a')
+            base = ord('A') if char.isupper() else ord('a')
+            plaintext += chr((ord(char) - base - shift) % 26 + base)
+            key_index += 1
+        else:
+            plaintext += char
+    return plaintext
 
 # Merkle-Hellman Knapsack Cryptosystem
 
@@ -69,7 +79,19 @@ def generate_private_key(n=8):
 
     @return 3-tuple `(w, q, r)`, with `w` a n-tuple, and q and r ints.
     """
-    raise NotImplementedError  # Your implementation here
+    w = []
+    w.append(random.randint(2,10))
+    for _ in range(1,n):
+        w.append(random.randint(sum(w)+1,2*sum(w)))
+    
+    q = random.randint(sum(w)+1,2*sum(w))
+
+    r = random.randint(2,q-1)
+    while not utils.coprime(r,q):
+         r= random.randint(2,q-1)
+
+    return (tuple(w), q, r)
+
 
 def create_public_key(private_key):
     """Create a public key corresponding to the given private key.
@@ -85,8 +107,11 @@ def create_public_key(private_key):
 
     @return n-tuple public key
     """
-    raise NotImplementedError  # Your implementation here
+    (w, q, r) = private_key
 
+    beta = tuple((r * w_i) % q for w_i in w)
+
+    return beta
 
 def encrypt_mh(message, public_key):
     """Encrypt an outgoing message using a public key.
@@ -106,7 +131,12 @@ def encrypt_mh(message, public_key):
 
     @return list of ints representing encrypted bytes
     """
-    raise NotImplementedError  # Your implementation here
+    ciphertext = []
+    for byte in message:
+        bits = utils.byte_to_bits(byte)  
+        c = sum(a_i * b_i for a_i, b_i in zip(bits, public_key))
+        ciphertext.append(c)
+    return ciphertext
 
 def decrypt_mh(message, private_key):
     """Decrypt an incoming message using a private key
@@ -126,5 +156,28 @@ def decrypt_mh(message, private_key):
 
     @return bytearray or str of decrypted characters
     """
-    raise NotImplementedError  # Your implementation here
+    (w, q, r) = private_key 
+    s=utils.modinv(r, q)
 
+    og_message = []
+
+    for c in message:
+        c1 = (c*s) % q
+
+        bits = []
+        for w_i in reversed(w):
+            if c1 >= w_i:
+                bits.insert(0, 1)
+                c1 -= w_i
+            else:
+                bits.insert(0, 0)
+
+        value = 0
+        for bit in bits:
+            value = (value << 1) | bit
+        og_message.append(value)
+        
+    og_message = ''.join(chr(n) for n in og_message)
+
+    return og_message 
+        
