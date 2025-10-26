@@ -180,4 +180,28 @@ def decrypt_mh(message, private_key):
     og_message = ''.join(chr(n) for n in og_message)
 
     return og_message 
+
+def encrypt_scytale(plaintext, circumference = 5):
+    ciphertext=""
+    for i in range(circumference):
+        j=i
+        while j< len(plaintext):
+            ciphertext += plaintext[j]
+            j+=circumference
+    return ciphertext
+
+def decrypt_scytale(ciphertext, circumference = 5 ):
+    plaintext=[''] * len(ciphertext)
+
+    k=0
+
+    for i in range(circumference):
+        j=i
+        while j< len(ciphertext):
+            plaintext[j] = ciphertext[k]
+            k += 1
+            j+=circumference
+
+    return ''.join(plaintext)
+
         
