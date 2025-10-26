@@ -163,7 +163,6 @@ def decrypt_mh(message, private_key):
 
     for c in message:
         c1 = (c*s) % q
-
         bits = []
         for w_i in reversed(w):
             if c1 >= w_i:
@@ -171,14 +170,11 @@ def decrypt_mh(message, private_key):
                 c1 -= w_i
             else:
                 bits.insert(0, 0)
-
         value = 0
         for bit in bits:
             value = (value << 1) | bit
-        og_message.append(value)
-        
+        og_message.append(value)  
     og_message = ''.join(chr(n) for n in og_message)
-
     return og_message 
 
 def encrypt_scytale(plaintext, circumference = 5):
@@ -192,9 +188,7 @@ def encrypt_scytale(plaintext, circumference = 5):
 
 def decrypt_scytale(ciphertext, circumference = 5 ):
     plaintext=[''] * len(ciphertext)
-
     k=0
-
     for i in range(circumference):
         j=i
         while j< len(ciphertext):
@@ -203,5 +197,45 @@ def decrypt_scytale(ciphertext, circumference = 5 ):
             j+=circumference
 
     return ''.join(plaintext)
+
+def encrypt_railfence(plaintext, num_rails = 3):
+    if num_rails == 1:
+        return plaintext
+    rails = [''] * num_rails
+    rail = 0
+    direction = 1 
+    for char in plaintext:
+        rails[rail] += char
+        rail += direction
+        if rail == 0 or rail == num_rails - 1:
+            direction *= -1 
+
+    return ''.join(rails)
+
+def decrypt_railfence(ciphertext, num_rails = 3):
+    if num_rails == 1:
+        return ciphertext
+
+    pattern = []
+    rail = 0
+    direction = 1
+    for _ in range(len(ciphertext)):
+        pattern.append(rail)
+        rail += direction
+        if rail == 0 or rail == num_rails - 1:
+            direction *= -1
+    rail_lengths = [pattern.count(i) for i in range(num_rails)]
+    rails = []
+    index = 0
+    for length in rail_lengths:
+        rails.append(list(ciphertext[index:index+length]))
+        index += length
+    result = []
+    for r in pattern:
+        result.append(rails[r].pop(0))
+
+    return ''.join(result)
+
+
 
         

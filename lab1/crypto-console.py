@@ -12,7 +12,7 @@ import random
 from crypto import (encrypt_caesar, decrypt_caesar,
                     encrypt_vigenere, decrypt_vigenere,
                     generate_private_key, create_public_key,
-                    encrypt_mh, decrypt_mh,encrypt_scytale,decrypt_scytale)
+                    encrypt_mh, decrypt_mh,encrypt_scytale,decrypt_scytale,encrypt_railfence,decrypt_railfence)
 
 
 #############################
@@ -21,7 +21,7 @@ from crypto import (encrypt_caesar, decrypt_caesar,
 
 def get_tool():
     print("* Tool *")
-    return _get_selection("(C)aesar, (V)igenere, (M)erkle-Hellman, (S)cytale? ", "CVMS")
+    return _get_selection("(C)aesar, (V)igenere, (M)erkle-Hellman, (S)cytale or (R)ailfence? ", "CVMSR")
 
 
 def get_action():
@@ -169,9 +169,24 @@ def run_scytale():
 
 
     print("* Transform *")
-    print("{}crypting {} using Scytale cipher...".format('En' if encrypting else 'De', data))
+    print("{}crypting {} using Scytale cipher with {} circumference...".format('En' if encrypting else 'De', data, circumference))
 
     output = (encrypt_scytale if encrypting else decrypt_scytale)(data,circumference)
+
+    set_output(output)
+
+
+def run_railfence():
+    action = get_action()
+    encrypting = action == 'E'
+    data = get_input(binary=False)
+
+    print("* Transform *")
+    num_rails = int(input("Number of rails? "))
+
+    print("{}crypting {} using Railfence cipher and {} rails...".format('En' if encrypting else 'De', data, num_rails))
+
+    output = (encrypt_railfence if encrypting else decrypt_railfence)(data, num_rails)
 
     set_output(output)
 
@@ -190,7 +205,8 @@ def run_suite():
         'C': run_caesar,         # Caesar Cipher
         'V': run_vigenere,       # Vigenere Cipher
         'M': run_merkle_hellman,  # Merkle-Hellman Knapsack Cryptosystem
-        'S': run_scytale
+        'S': run_scytale,
+        'R': run_railfence
     }
     commands[tool]()
 
