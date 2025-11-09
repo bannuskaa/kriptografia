@@ -1,0 +1,11 @@
+{
+  "block_size_bits": 32,
+  "algorithm": "Vigenere", 
+  "mode": "OFB",
+  "vig_key": "00112233445566778899AABBCCDDEEFF",
+  "des_key": "0123456789ABCDEF",
+  "iv_hex": "00112233445566",
+  "padding": "zero", 
+  "input_file": "example.txt",
+  "output_file": "output.enc"
+}
